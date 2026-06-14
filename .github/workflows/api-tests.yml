@@ -1,0 +1,89 @@
+name: API Tests
+
+# Pipeline: roda o Health Check primeiro. Só se ele passar, dispara em paralelo
+# as suites de Contract e Functional (ambas dependem do job healthcheck).
+#
+# Pré-requisito: configurar o secret AUTH_TOKEN no repositório
+# (Settings > Secrets and variables > Actions) com um JWT válido.
+# O servidor goTest fica off em janelas de manutenção (dias úteis 23h–07h BR,
+# fins de semana 08h–17h BR) — execuções nesses horários vão falhar com 503.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  BASEURL: https://gotest.com.br/api/api
+  DEFAULT_PROJECT_ID: db581363-3a96-465d-bd55-da891a30dd57
+  DEFAULT_SUITE_ID: 2c966cde-5888-4067-b704-25cec9121a0a
+  AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+  LOG_ENABLED: "false"
+
+jobs:
+  healthcheck:
+    name: Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+      - name: Run Health Check suite
+        run: mvn -B test -Phealthcheck
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-healthcheck
+          path: target/allure-results
+          if-no-files-found: ignore
+
+  contract:
+    name: Contract
+    needs: healthcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+      - name: Run Contract suite
+        run: mvn -B test -Pcontract
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-contract
+          path: target/allure-results
+          if-no-files-found: ignore
+
+  functional:
+    name: Functional
+    needs: healthcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: maven
+      - name: Run Functional suite
+        run: mvn -B test -Pfunctional
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-functional
+          path: target/allure-results
+          if-no-files-found: ignore

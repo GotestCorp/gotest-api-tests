@@ -1,0 +1,34 @@
+# =============================================================================
+# Modelo de configuração da suite de testes.
+#
+# Copie este arquivo para config.properties e preencha os valores reais:
+#   cp config.properties.example config.properties
+#
+# config.properties está no .gitignore — NÃO commite tokens reais.
+#
+# Precedência (do mais forte ao mais fraco):
+#   1) -Dchave=valor na linha de comando do Maven
+#   2) Variável de ambiente (ex: BASEURL, AUTH_TOKEN, DEFAULT_PROJECT_ID)
+#   3) config.properties
+#
+# No CI, prefira variáveis de ambiente / secrets em vez do arquivo.
+# =============================================================================
+
+# URL base da API (sem barra no final).
+baseUrl=https://gotest.com.br/api/api
+
+# Bearer token JWT. JWTs expiram — gere/renove e exporte como AUTH_TOKEN no CI.
+auth.token=COLE_SEU_TOKEN_JWT_AQUI
+
+# ID de um projeto válido pra rodar testes que dependem de um projeto existente.
+default.project.id=db581363-3a96-465d-bd55-da891a30dd57
+
+# ID de uma suite válida pra rodar testes que dependem de uma suite existente.
+default.suite.id=2c966cde-5888-4067-b704-25cec9121a0a
+
+# Timeouts em milissegundos
+timeout.connection=10000
+timeout.response=30000
+
+# Habilita request/response logging em todas as chamadas (ruidoso em CI)
+log.enabled=true

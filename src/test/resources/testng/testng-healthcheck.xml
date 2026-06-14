@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="HealthCheck Suite" verbose="1" parallel="methods" thread-count="2">
+
+    <listeners>
+        <listener class-name="br.com.gotest.apitests.listener.TestListener"/>
+    </listeners>
+
+    <test name="HealthCheck Tests">
+        <packages>
+            <package name="br.com.gotest.apitests.healthcheck"/>
+        </packages>
+    </test>
+</suite>

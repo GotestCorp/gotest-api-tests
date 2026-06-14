@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Functional Suite" verbose="1" parallel="classes" thread-count="3">
+
+    <listeners>
+        <listener class-name="br.com.gotest.apitests.listener.TestListener"/>
+    </listeners>
+
+    <test name="Functional Tests">
+        <packages>
+            <package name="br.com.gotest.apitests.functional"/>
+        </packages>
+    </test>
+</suite>

@@ -1,0 +1,35 @@
+[
+  {
+    "projectId": "911596d8-bb8a-4048-9f2f-93fb071c5aea",
+    "suiteId": "a7a64533-9783-4b30-a653-791162c6a81c",
+    "defaults": {
+      "testType": "SCENARIO",
+      "status": "IN_PROGRESS",
+      "priority": "MEDIUM",
+      "executionType": "MANUAL"
+    },
+    "cases": [
+      { "title": "Validar o login com sucesso ao autenticar com um usuário pertencente à lista de selecionados Alpha" },
+      { "title": "Validar que o sistema impede o login e exibe o modal explicativo ao tentar acessar a plataforma com um usuário não incluído na lista Alpha" },
+      { "title": "Validar o fechamento do modal explicativo de acesso restrito com sucesso ao interagir com o botão de fechar" },
+      { "title": "Validar que o sistema mantém o usuário retido na tela inicial de login ao tentar fechar o modal de restrição Alpha" }
+    ]
+  },
+  {
+    "projectId": "911596d8-bb8a-4048-9f2f-93fb071c5aea",
+    "suiteId": "2b69beb8-c75c-4c8a-83ee-0d0db0fdcfcf",
+    "defaults": {
+      "testType": "SCENARIO",
+      "status": "IN_PROGRESS",
+      "priority": "MEDIUM",
+      "executionType": "MANUAL"
+    },
+    "cases": [
+      { "title": "Validar a exibição do modal de 'Termos de Uso' com sucesso ao clicar no link respectivo no fluxo de login ou cadastro" },
+      { "title": "Validar a exibição do modal de 'Política de Privacidade' com sucesso ao clicar no link respectivo no fluxo de login ou cadastro" },
+      { "title": "Validar o fechamento dos modais legais com sucesso ao clicar no botão de fechar ou no overlay de fundo" },
+      { "title": "Validar que o sistema permite a rolagem do texto com sucesso ao tentar visualizar o conteúdo completo dos Termos de Uso ou da Política de Privacidade" },
+      { "title": "Validar que o sistema preserva os dados já inseridos no formulário ao tentar abrir e fechar os modais legais durante o preenchimento do cadastro" }
+    ]
+  }
+]

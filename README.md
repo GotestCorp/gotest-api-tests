@@ -10,7 +10,7 @@ Suite de testes de API para a plataforma **goTest**, cobrindo os domínios de Au
 |---|---|
 | Java (JDK) | 11 |
 | Maven | 3.8+ |
-| Acesso à API goTest | Token JWT válido |
+| Acesso à API goTest | Usuário e senha (ou um token JWT já pronto) |
 
 ---
 
@@ -20,7 +20,12 @@ Edite `src/test/resources/config.properties` com as suas credenciais:
 
 ```properties
 baseUrl=https://gotest.com.br/api/api
-auth.token=eyJhbGci...    # Token JWT obtido pelo fluxo Google OAuth
+
+# A suite loga sozinha em POST /auth/login na primeira chamada e cacheia
+# o token em memória pelo resto da execução — sem precisar renovar nada
+# manualmente (os JWTs dessa API expiram em ~24h).
+auth.email=seu-email@exemplo.com
+auth.password=sua-senha
 
 # IDs padrão usados pelos comandos de DataSetup e pelos testes
 default.project.id=seu-project-uuid
@@ -29,8 +34,11 @@ default.suite.id=seu-suite-uuid
 
 > Qualquer propriedade pode ser sobrescrita via argumento Maven sem alterar o arquivo:
 > ```
-> mvn test -DbaseUrl=https://staging.gotest.com.br/api/api -Dauth.token=eyJ...
+> mvn test -DbaseUrl=https://staging.gotest.com.br/api/api -Dauth.email=... -Dauth.password=...
 > ```
+
+> Prefere colar um token já pronto em vez de logar por código? Defina
+> `auth.token` — quando presente, ele tem prioridade sobre `auth.email`/`auth.password`.
 
 ---
 
@@ -227,6 +235,7 @@ src/
 │   │   └── AccessManagementClient.java
 │   ├── config/           # Configuração centralizada
 │   │   ├── ConfigManager.java
+│   │   ├── AuthTokenProvider.java   <- login programático (POST /auth/login), token cacheado em memória
 │   │   └── RestAssuredSpecs.java
 │   ├── endpoint/         # Constantes e métodos de path da API
 │   │   └── Endpoints.java

@@ -39,8 +39,12 @@ public abstract class BaseTest {
             throw new IllegalStateException(
                     "baseUrl não configurado. Defina em config.properties ou via -DbaseUrl=...");
         }
-        if (config.authToken() == null || config.authToken().isBlank()) {
-            log.warn("auth.token vazio. Endpoints autenticados vão falhar com 401.");
+        boolean hasStaticToken = config.get("auth.token") != null && !config.get("auth.token").isBlank();
+        boolean hasCredentials = config.get("auth.email") != null && !config.get("auth.email").isBlank()
+                && config.get("auth.password") != null && !config.get("auth.password").isBlank();
+        if (!hasStaticToken && !hasCredentials) {
+            log.warn("Nenhuma credencial configurada (auth.token ou auth.email/auth.password). "
+                    + "Endpoints autenticados vão falhar com 401.");
         }
     }
 }

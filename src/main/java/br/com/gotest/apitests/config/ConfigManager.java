@@ -84,7 +84,6 @@ public final class ConfigManager {
 
     // Atalhos para configs mais usadas
     public String baseUrl()        { return get("baseUrl"); }
-    public String authToken()      { return get("auth.token"); }
     public String defaultProjectId() { return get("default.project.id"); }
     public String defaultSuiteId()   { return get("default.suite.id"); }
     public int connectionTimeout() { return getInt("timeout.connection", 10_000); }

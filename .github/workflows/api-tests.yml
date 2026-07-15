@@ -3,12 +3,18 @@ name: API Tests
 # Pipeline: roda o Health Check primeiro. Só se ele passar, dispara em paralelo
 # as suites de Contract e Functional (ambas dependem do job healthcheck).
 #
-# Pré-requisito: configurar o secret AUTH_TOKEN no repositório
-# (Settings > Secrets and variables > Actions) com um JWT válido.
-# Os JWTs dessa API expiram em ~24h — renove o secret com
-# ./scripts/refresh-ci-token.sh <jwt> antes de depender da pipeline.
-# O job healthcheck valida o token antes de rodar os testes e falha rápido
-# com mensagem clara se ele estiver vencido.
+# Autenticação: cada job loga sozinho via POST /auth/login no início da suite
+# (ver AuthTokenProvider) usando as credenciais abaixo — não há mais token
+# fixo pra renovar manualmente (os JWTs dessa API expiram em ~24h).
+#
+# Pré-requisito: configurar os secrets CI_AUTH_EMAIL e CI_AUTH_PASSWORD no
+# repositório (Settings > Secrets and variables > Actions). Idealmente uma
+# conta de serviço dedicada para CI, não uma conta pessoal — a API goTest
+# ainda não expõe API key/service account, então login com usuário e senha
+# é a única forma programática disponível hoje.
+#
+# O job healthcheck faz um login de teste antes de rodar a suite e falha
+# rápido com mensagem clara se as credenciais estiverem erradas.
 # O servidor goTest fica off em janelas de manutenção (dias úteis 23h–07h BR,
 # fins de semana 08h–17h BR) — execuções nesses horários vão falhar com 503.
 
@@ -23,7 +29,8 @@ env:
   BASEURL: https://gotest.com.br/api/api
   DEFAULT_PROJECT_ID: b4a9db3b-9ef8-4734-99ed-d54dc1585803
   DEFAULT_SUITE_ID: 71c34269-e35e-4868-9518-9449e65b2da7
-  AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+  AUTH_EMAIL: ${{ secrets.CI_AUTH_EMAIL }}
+  AUTH_PASSWORD: ${{ secrets.CI_AUTH_PASSWORD }}
   LOG_ENABLED: "false"
 
 jobs:
@@ -38,14 +45,16 @@ jobs:
           distribution: temurin
           java-version: '11'
           cache: maven
-      - name: Verificar validade do AUTH_TOKEN
+      - name: Verificar credenciais de CI
         run: |
-          status=$(curl -s -o /dev/null -w "%{http_code}" "$BASEURL/users/me" -H "Authorization: Bearer $AUTH_TOKEN")
+          status=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASEURL/auth/login" \
+            -H "Content-Type: application/json" \
+            -d "{\"user\":\"$AUTH_EMAIL\",\"password\":\"$AUTH_PASSWORD\",\"rememberMe\":false}")
           if [ "$status" != "200" ]; then
-            echo "::error::AUTH_TOKEN inválido ou expirado (GET /users/me retornou $status). Os JWTs dessa API expiram em ~24h — gere um token novo e rode ./scripts/refresh-ci-token.sh <jwt> para atualizar o secret."
+            echo "::error::Login falhou (POST /auth/login retornou $status). Verifique os secrets CI_AUTH_EMAIL/CI_AUTH_PASSWORD no repositório."
             exit 1
           fi
-          echo "AUTH_TOKEN válido."
+          echo "Credenciais de CI válidas."
       - name: Run Health Check suite
         run: mvn -B test -Phealthcheck
       - name: Upload Allure results

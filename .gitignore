@@ -42,3 +42,7 @@ src/test/resources/config.properties
 
 # Saída de execução local de testes
 test-output.txt
+
+# Snapshot local do OpenAPI/Swagger da API (pode conter detalhes internos;
+# baixe uma versão atual quando precisar via /api/auth/swagger/access?token=...)
+docs/api/swagger.json

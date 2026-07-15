@@ -6,6 +6,7 @@ para que voltem a passar automaticamente quando o backend corrigir o comportamen
 
 > Validado ao vivo em **2026-06-15** — suíte completa: 47 testes, 2 falhas (ambas abaixo).
 > Revalidado em **2026-07-14** (nova versão do sistema) — 47 testes, 1 falha: **BUG-2 foi corrigido pelo backend** (suite inexistente agora responde corretamente, teste `nonExistingSuite_shouldReturn404` passou). BUG-1 continua aberto.
+> Reconfirmado ao vivo em **2026-07-15** — ver nota de falso-positivo no BUG-1 abaixo.
 
 ---
 
@@ -17,6 +18,19 @@ para que voltem a passar automaticamente quando o backend corrigir o comportamen
 - **Obtido:** `200 OK` — o caso de teste é criado com título vazio.
 - **Impacto:** permite dados inconsistentes; ausência de validação de campo obrigatório.
 - **Teste:** `CreateTestCaseTest.emptyTitle_shouldReturn400`
+- **Nota (2026-07-15) — falso-positivo nas pipelines de 2026-07-15T01:0x–01:3x:** o teste
+  apareceu como **verde** nessas execuções, mas não porque o backend passou a validar o
+  título. O próprio teste tinha um bug: quando o 200 do BUG-1 dispara, ele nunca capturava
+  o `id` criado pra limpeza (`@AfterMethod` só deleta se `createdTestCaseId != null`), então
+  um registro órfão com `title=""` ficou parado na suite fixture (APIT). Nas execuções
+  seguintes, tentar criar outro teste com `title=""` esbarrava numa regra de **nome
+  duplicado** e o backend respondia `422 "This test name is already in use"` — um código
+  que satisfaz o assert (`isIn(400, 422)`) sem ter relação nenhuma com validação de título
+  obrigatório. Revalidado ao vivo em 2026-07-15: apagando o registro órfão e repetindo a
+  chamada, o backend voltou a aceitar título vazio com `200` — **BUG-1 confirmado ainda
+  aberto**. O teste foi corrigido para capturar o `id` sempre que a criação "funcionar"
+  (200/201), independente do assert, evitando que a suite fixture acumule lixo e mascare
+  o bug de novo no futuro.
 
 ## BUG-2 — Suite inexistente retorna 500 (deveria ser 403/404) — ✅ CORRIGIDO em 2026-07-14
 

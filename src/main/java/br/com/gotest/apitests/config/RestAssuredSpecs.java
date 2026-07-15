@@ -38,7 +38,7 @@ public class RestAssuredSpecs {
                 .setAccept(ContentType.JSON)
                 .setConfig(timeoutsConfig());
 
-        String token = CONFIG.authToken();
+        String token = AuthTokenProvider.getToken();
         if (token != null && !token.isBlank()) {
             builder.addHeader("Authorization", "Bearer " + token);
         }

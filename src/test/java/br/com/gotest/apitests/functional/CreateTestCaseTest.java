@@ -60,6 +60,15 @@ public class CreateTestCaseTest extends BaseTest {
     @Description("Cenário negativo: título obrigatório")
     public void emptyTitle_shouldReturn400() {
         Response response = testCaseClient.create(projectId, suiteId, TestCaseRequestBuilder.invalidEmptyTitle());
+
+        if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
+            // BUG-1 (ver BACKEND_BUGS.md): backend aceita título vazio e cria um registro
+            // de verdade. Captura o id pra @AfterMethod limpar — senão o registro fica
+            // órfão na suite fixture e a PRÓXIMA execução colide em "nome já em uso",
+            // um 422 que passa no assert abaixo sem validar título nenhum (falso positivo).
+            createdTestCaseId = response.as(TestCase.class).getId();
+        }
+
         assertThat(response.getStatusCode()).isIn(400, 422);
     }
 

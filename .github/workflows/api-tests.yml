@@ -5,6 +5,10 @@ name: API Tests
 #
 # Pré-requisito: configurar o secret AUTH_TOKEN no repositório
 # (Settings > Secrets and variables > Actions) com um JWT válido.
+# Os JWTs dessa API expiram em ~24h — renove o secret com
+# ./scripts/refresh-ci-token.sh <jwt> antes de depender da pipeline.
+# O job healthcheck valida o token antes de rodar os testes e falha rápido
+# com mensagem clara se ele estiver vencido.
 # O servidor goTest fica off em janelas de manutenção (dias úteis 23h–07h BR,
 # fins de semana 08h–17h BR) — execuções nesses horários vão falhar com 503.
 
@@ -34,6 +38,14 @@ jobs:
           distribution: temurin
           java-version: '11'
           cache: maven
+      - name: Verificar validade do AUTH_TOKEN
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" "$BASEURL/users/me" -H "Authorization: Bearer $AUTH_TOKEN")
+          if [ "$status" != "200" ]; then
+            echo "::error::AUTH_TOKEN inválido ou expirado (GET /users/me retornou $status). Os JWTs dessa API expiram em ~24h — gere um token novo e rode ./scripts/refresh-ci-token.sh <jwt> para atualizar o secret."
+            exit 1
+          fi
+          echo "AUTH_TOKEN válido."
       - name: Run Health Check suite
         run: mvn -B test -Phealthcheck
       - name: Upload Allure results
